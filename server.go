@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"fmt"
 )
 
 type UserData struct {
@@ -34,10 +35,15 @@ func whoami(w http.ResponseWriter, r *http.Request) {
 		"Remote IP": r.RemoteAddr,
 	}
 
+	fmt.Println(r)
+
 	headers := r.Header
 	for k, v := range headers {
 		if _, ok := userData[k]; ok {
 			userData[k] = v[0]
+		}
+		if k == "X-Forwarded-For" {
+			userData["Remote IP"] = v[0]
 		}
 	}
 
