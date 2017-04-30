@@ -1,26 +1,19 @@
 package main
 
 import (
-	"net/http"
 	"encoding/json"
-	"log"
-	"os"
 	"fmt"
+	"log"
+	"net/http"
+	"os"
 )
-
-type UserData struct {
-  UserAgent string `json:"user-agent"`
-  Language string  `json:"language"`
-	IPAddr string `json:"ip-address"`
-	RemoteIPAddr string `json:"remote-ip-address"`
-}
 
 func getPort() string {
 	port := os.Getenv("PORT")
 	if len(port) == 0 {
 		port = "3000"
 	}
-	return ":"+port
+	return ":" + port
 }
 
 func whoami(w http.ResponseWriter, r *http.Request) {
@@ -29,16 +22,12 @@ func whoami(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userData := map[string]string{
-		"User-Agent": "",
+		"User-Agent":      "",
 		"Accept-Language": "",
-		"IP-Addr": r.Host,
-		"Remote IP": r.RemoteAddr,
+		"Remote IP":       r.RemoteAddr,
 	}
 
-	fmt.Println(r)
-
-	headers := r.Header
-	for k, v := range headers {
+	for k, v := range r.Header {
 		if _, ok := userData[k]; ok {
 			userData[k] = v[0]
 		}
@@ -47,13 +36,17 @@ func whoami(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	res, _ := json.Marshal(userData)
+	res, err := json.Marshal(userData)
+
+	if err != nil {
+		fmt.Println("Marshal error: ", err)
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(res)
 }
 
-func faviconHandler(w http.ResponseWriter, r *http.Request)  {
+func faviconHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "./favicon.ico")
 }
 
